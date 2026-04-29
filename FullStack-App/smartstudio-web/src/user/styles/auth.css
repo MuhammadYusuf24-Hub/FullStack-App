@@ -1,0 +1,346 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-200: #bfdbfe;
+    --blue-400: #60a5fa;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --blue-800: #1e40af;
+    --blue-900: #1e3a8a;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --shadow-xl: 0 20px 60px rgba(37, 99, 235, 0.18);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 24px;
+    --radius-xl: 36px;
+    --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --anim-dur: 0.9s;
+    --anim-ease: cubic-bezier(0.77, 0, 0.18, 1);
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #f0f7ff 40%, #e0ecff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#root { width: 100%; }
+
+.app-root {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+input, button { font-family: 'Outfit', sans-serif; }
+button { cursor: pointer; }
+
+/* ============================================================
+   AUTH CARD — 2 kolom grid tetap
+   ============================================================ */
+.auth-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    max-width: 900px;
+    min-height: 560px;
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    position: relative;
+}
+
+/* ============================================================
+   PANEL BIRU — full overlay, dikontrol clip-path
+   Login  : clip kanan 50%  → tampil di kiri
+   Register: clip kiri 50%  → tampil di kanan
+   ============================================================ */
+.panel-info {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    /* Login mode default: panel di kiri */
+    clip-path: inset(0 50% 0 0 round var(--radius-xl));
+    transition: clip-path var(--anim-dur) var(--anim-ease);
+}
+
+/* Register mode: panel di kanan */
+.auth-card.register-mode .panel-info {
+    clip-path: inset(0 0 0 50% round var(--radius-xl));
+    justify-content: flex-end;
+}
+
+/* Animasi login → register: expand full lalu ke kanan */
+@keyframes coverToRight {
+    0%   { clip-path: inset(0 50% 0 0   round var(--radius-xl)); }
+    45%  { clip-path: inset(0 0   0 0   round var(--radius-xl)); }
+    55%  { clip-path: inset(0 0   0 0   round var(--radius-xl)); }
+    100% { clip-path: inset(0 0   0 50% round var(--radius-xl)); }
+}
+
+/* Animasi register → login: expand full lalu ke kiri */
+@keyframes coverToLeft {
+    0%   { clip-path: inset(0 0   0 50% round var(--radius-xl)); }
+    45%  { clip-path: inset(0 0   0 0   round var(--radius-xl)); }
+    55%  { clip-path: inset(0 0   0 0   round var(--radius-xl)); }
+    100% { clip-path: inset(0 50% 0 0   round var(--radius-xl)); }
+}
+
+.auth-card.animating-to-register .panel-info {
+    animation: coverToRight var(--anim-dur) var(--anim-ease) forwards;
+    transition: none;
+}
+
+.auth-card.animating-to-login .panel-info {
+    animation: coverToLeft var(--anim-dur) var(--anim-ease) forwards;
+    transition: none;
+}
+
+/* Konten panel */
+.panel-info-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    color: white;
+    padding: 40px 32px;
+    width: 50%;
+    height: 100%;
+    transition: opacity 0.15s ease;
+}
+
+/* Sembunyikan konten saat animasi berlangsung */
+.auth-card.animating-to-register .panel-info-inner,
+.auth-card.animating-to-login .panel-info-inner {
+    opacity: 0;
+}
+
+.panel-text h1 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.panel-text p {
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    max-width: 220px;
+    margin: 0 auto;
+}
+
+.switch-btn {
+    background: rgba(255, 255, 255, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.60);
+    color: white;
+    padding: 9px 32px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    letter-spacing: 0.3px;
+}
+
+.switch-btn:hover {
+    background: rgba(255, 255, 255, 0.30);
+    border-color: white;
+    transform: scale(1.04);
+}
+
+/* ============================================================
+   FORM AREA — grid kiri & kanan
+   ============================================================ */
+.panel-form-login,
+.panel-form-register {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 36px;
+    z-index: 1;
+}
+
+/* ============================================================
+   FORM INNER
+   ============================================================ */
+.form-inner {
+    width: 100%;
+    max-width: 300px;
+}
+
+.form-inner h2 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+.form-inner .subtitle {
+    font-size: 13.5px;
+    color: var(--gray-500);
+    margin-bottom: 28px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gray-600);
+    letter-spacing: 0.3px;
+}
+
+.field input {
+    padding: 11px 14px;
+    border: 1.8px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    outline: none;
+    transition: var(--transition);
+}
+
+.field input:focus {
+    border-color: var(--blue-500);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+}
+
+.field input::placeholder { color: var(--gray-300); }
+
+.field-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.field-row a {
+    font-size: 12.5px;
+    color: var(--blue-600);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.field-row a:hover { color: var(--blue-800); }
+
+.btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.30);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.38);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.form-footer {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.form-footer a {
+    color: var(--blue-600);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-footer a:hover { color: var(--blue-800); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 680px) {
+    .auth-card {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+    }
+
+    .panel-info {
+        position: relative;
+        clip-path: none !important;
+        animation: none !important;
+        inset: unset;
+        width: 100%;
+        height: 180px;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        justify-content: center;
+    }
+
+    .panel-info-inner {
+        width: 100%;
+        opacity: 1 !important;
+    }
+
+    .panel-form-login,
+    .panel-form-register { padding: 32px 24px; }
+
+    .auth-card.login-mode .panel-form-register { display: none; }
+    .auth-card.register-mode .panel-form-login  { display: none; }
+}

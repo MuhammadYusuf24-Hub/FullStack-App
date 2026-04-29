@@ -1,0 +1,427 @@
+/* =============================================
+   simpleForm.css — SmartStudio Auth Flow
+   ============================================= */
+
+.sf-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 24px;
+}
+
+.sf-card {
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(37, 99, 235, 0.14), 0 4px 16px rgba(0, 0, 0, 0.06);
+  padding: 44px 40px 36px;
+  width: 100%;
+  max-width: 440px;
+  animation: sfSlideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes sfSlideUp {
+  from { opacity: 0; transform: translateY(28px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* ── Step Indicator ─────────────────────────── */
+.sf-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.sf-step-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+
+.sf-step-group:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: calc(50% + 17px);
+  width: 48px;
+  height: 2px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  transition: background 0.4s;
+}
+
+.sf-step-group.done::after {
+  background: #2563eb;
+}
+
+.sf-step {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  transition: all 0.35s;
+  position: relative;
+  z-index: 1;
+}
+
+.sf-step span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.sf-step.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.sf-step.active span {
+  color: white;
+}
+
+.sf-step.done {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.sf-step-group > p {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+  margin: 0;
+  transition: color 0.35s;
+}
+
+.sf-step-group > p.active {
+  color: #2563eb;
+}
+
+/* ── Icon wrap ──────────────────────────────── */
+.sf-icon-wrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.sf-icon-wrap.blue   { background: #eff6ff; }
+.sf-icon-wrap.purple { background: #f5f3ff; }
+.sf-icon-wrap.green  { background: #f0fdf4; }
+
+/* ── Title & subtitle ───────────────────────── */
+.sf-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.sf-subtitle {
+  font-size: 13.5px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.sf-subtitle strong {
+  color: #1e293b;
+}
+
+/* ── Field ──────────────────────────────────── */
+.sf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.sf-field label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.3px;
+}
+
+.sf-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sf-input-icon {
+  position: absolute;
+  left: 13px;
+  color: #94a3b8;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.sf-input-wrap input {
+  width: 100%;
+  padding: 12px 40px 12px 38px;
+  border: 1.8px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Outfit', sans-serif;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.25s;
+}
+
+.sf-input-wrap input:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.sf-input-wrap input::placeholder {
+  color: #cbd5e1;
+}
+
+.sf-input-wrap.valid input   { border-color: #22c55e; background: #f0fdf4; }
+.sf-input-wrap.invalid input { border-color: #ef4444; background: #fef2f2; }
+
+.sf-eye {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.sf-eye:hover {
+  color: #3b82f6;
+}
+
+/* ── OTP boxes ──────────────────────────────── */
+.sf-otp-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.sf-otp-box {
+  width: 50px;
+  height: 58px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'Nunito', sans-serif;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s;
+  caret-color: #3b82f6;
+}
+
+.sf-otp-box:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.sf-otp-box.filled {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.sf-otp-box.err {
+  border-color: #ef4444;
+  background: #fef2f2;
+  animation: sfShake 0.4s ease;
+}
+
+@keyframes sfShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60%  { transform: translateX(-4px); }
+  40%, 80%  { transform: translateX(4px); }
+}
+
+/* ── Timer ──────────────────────────────────── */
+.sf-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: #94a3b8;
+  margin: 10px 0 4px;
+}
+
+/* ── Strength bar ───────────────────────────── */
+.sf-strength-bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 7px;
+}
+
+.sf-strength-seg {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: #e2e8f0;
+  transition: background 0.35s;
+}
+
+.sf-strength-label {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 99px;
+  margin-top: 5px;
+}
+
+/* ── Match feedback ─────────────────────────── */
+.sf-match-ok  { font-size: 12px; font-weight: 600; color: #22c55e; margin-top: 3px; }
+.sf-match-err { font-size: 12px; font-weight: 600; color: #ef4444; margin-top: 3px; }
+
+/* ── Error ──────────────────────────────────── */
+.sf-error {
+  font-size: 12.5px;
+  color: #ef4444;
+  font-weight: 600;
+  margin-top: 4px;
+  display: block;
+}
+
+.sf-error.center {
+  text-align: center;
+}
+
+/* ── Button ─────────────────────────────────── */
+.sf-btn {
+  width: 100%;
+  margin-top: 22px;
+  padding: 14px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sf-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.38);
+}
+
+.sf-btn:active  { transform: translateY(0); }
+
+.sf-btn:disabled {
+  opacity: 0.70;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sf-btn.purple {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.28);
+}
+
+.sf-btn.purple:hover {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.38);
+}
+
+.sf-btn.green {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.28);
+}
+
+.sf-btn.green:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.38);
+}
+
+/* ── Spinner ─────────────────────────────────── */
+.sf-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: sfSpin 0.7s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes sfSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Footer ──────────────────────────────────── */
+.sf-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.sf-footer a {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.sf-footer a:hover {
+  color: #1d4ed8;
+}
+
+/* ── Timer expired state ── */
+.sf-timer-expired {
+  color: #ef4444;
+}
+
+/* ── Responsive OTP ── */
+@media (max-width: 400px) {
+  .sf-otp-group { gap: 6px; }
+  .sf-otp-box   { width: 40px; height: 48px; font-size: 18px; }
+}
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 480px) {
+  .sf-card     { padding: 32px 22px 28px; }
+  .sf-otp-box  { width: 42px; height: 50px; font-size: 20px; }
+  .sf-steps    { gap: 12px; }
+}
