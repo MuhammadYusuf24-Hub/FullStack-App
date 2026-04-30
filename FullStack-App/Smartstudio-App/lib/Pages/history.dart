@@ -15,19 +15,19 @@
 //   final search = TextEditingController();
 
 //   @override
-//   void initState() {
-//     super.initState();
-//     load();
-//   }
+//   // void initState() {
+//   //   super.initState();
+//   //   load();
+//   // }
 
-//   void load() async {
-//     var res = await ServiceApi.getHistory();
-//     setState(() {
-//       data = res;
-//       filtered = res;
-//       isLoading = false;
-//     });
-//   }
+//   // void load() async {
+//   //   var res = await ServiceApi.getHistory();
+//   //   setState(() {
+//   //     data = res;
+//   //     filtered = res;
+//   //     isLoading = false;
+//   //   });
+//   // }
 
 //   void doSearch(String keyword) {
 //     setState(() {

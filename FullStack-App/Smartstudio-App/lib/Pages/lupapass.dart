@@ -1,226 +1,140 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Pages/app_them.dart';
-import 'package:flutter_application_1/Service/serviceapi.dart';
+import '../Service/serviceapi.dart';
+import './ss_them.dart';
 import 'verifotp.dart';
+import 'login.dart';
 
 class ForgotEmailPage extends StatefulWidget {
   const ForgotEmailPage({super.key});
-
   @override
   State<ForgotEmailPage> createState() => _ForgotEmailPageState();
 }
 
-class _ForgotEmailPageState extends State<ForgotEmailPage>
-    with SingleTickerProviderStateMixin {
-  final _formKey  = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
-
+class _ForgotEmailPageState extends State<ForgotEmailPage> {
+  final _email = TextEditingController();
   bool _loading = false;
-  String _error = '';
-
-  late AnimationController _anim;
-  late Animation<double> _fadeAnim;
-  late Animation<Offset> _slideAnim;
+  String _error = "";
 
   @override
-  void initState() {
-    super.initState();
-    _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _fadeAnim  = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _anim, curve: Curves.easeOut));
-    _anim.forward();
-  }
+  void dispose() { _email.dispose(); super.dispose(); }
 
-  @override
-  void dispose() {
-    _anim.dispose();
-    _emailCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _kirimOtp() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() { _loading = true; _error = ''; });
-
-    final data = await ServiceApi.kirimOtp(_emailCtrl.text.trim());
-
+  void _kirim() async {
+    setState(() => _error = "");
+    if (_email.text.isEmpty) {
+      setState(() => _error = "Email wajib diisi"); return;
+    }
+    setState(() => _loading = true);
+    final res = await ServiceApi.kirimOtp(_email.text.trim());
     if (!mounted) return;
     setState(() => _loading = false);
-
-    if (data['status'] == 'success') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ForgotOtpPage(email: _emailCtrl.text.trim()),
-        ),
-      );
+    if (res['status'] == 'success') {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (_) => ForgotOtpPage(email: _email.text.trim()),
+      ));
     } else {
-      setState(() => _error = data['message'] ?? 'Email tidak ditemukan.');
+      setState(() => _error = res['message'] ?? "Email tidak ditemukan");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GradientScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.gray700, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Lupa Kata Sandi',
-          style: TextStyle(
-            color: AppColors.gray800,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: SlideTransition(
-          position: _slideAnim,
+    return Scaffold(
+      body: Container(
+        decoration: bgGradient,
+        // ← Tidak pakai SingleChildScrollView agar tidak bisa scroll
+        child: SafeArea(
           child: Center(
-            child: SingleChildScrollView(
+            child: Padding(
               padding: const EdgeInsets.all(24),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(28),
+                constraints: const BoxConstraints(maxWidth: 440),
+                padding: const EdgeInsets.fromLTRB(40, 44, 40, 36),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.blue600.withOpacity(0.12),
-                      blurRadius: 40,
-                      offset: const Offset(0, 16),
-                    ),
+                  color: ssWhite,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x242563EB),
+                        blurRadius: 60, offset: Offset(0, 20)),
+                    BoxShadow(color: Color(0x0F000000),
+                        blurRadius: 16, offset: Offset(0, 4)),
                   ],
                 ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Step indicator
-                      const Center(child: StepIndicator(current: 1)),
-                      const SizedBox(height: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Step indicator
+                    const SSStepIndicator(current: 1),
+                    const SizedBox(height: 28),
 
-                      // Icon
-                      Center(
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: AppColors.blue50,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.mail_outline_rounded,
-                            color: AppColors.blue600,
-                            size: 28,
-                          ),
-                        ),
+                    // Icon
+                    Container(
+                      width: 68, height: 68,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffEFF6FF),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(height: 16),
+                      child: const Icon(Icons.mail_outline_rounded,
+                          color: ssBlue600, size: 30),
+                    ),
+                    const SizedBox(height: 20),
 
-                      const Center(
-                        child: Text(
-                          'Lupa Kata Sandi?',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.gray800,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Center(
-                        child: Text(
-                          'Masukkan email terdaftar. Kami akan\nmengirim kode OTP yang berlaku 5 menit.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            color: AppColors.gray500,
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Email field
-                      AppTextField(
-                        label: 'Alamat Email',
-                        placeholder: 'contoh@email.com',
-                        controller: _emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: const Icon(Icons.email_outlined,
-                            size: 18, color: AppColors.gray400),
-                        onChanged: (_) => setState(() => _error = ''),
-                        validator: (v) {
-                          if (v?.isEmpty ?? true) return 'Email wajib diisi';
-                          if (!v!.contains('@')) return 'Format email tidak valid';
-                          return null;
-                        },
-                      ),
-
-                      // Error
-                      if (_error.isNotEmpty) ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.red50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.red500.withOpacity(0.3)),
-                          ),
-                          child: Text(
-                            _error,
-                            style: const TextStyle(
-                              fontSize: 12.5,
-                              color: AppColors.red500,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 22),
-                      AppButton(
-                        text: 'Kirim Kode OTP',
-                        loading: _loading,
-                        onPressed: _loading ? null : _kirimOtp,
-                      ),
-                      const SizedBox(height: 20),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    const Text("Lupa Kata Sandi?",
+                        style: TextStyle(fontFamily: 'Nunito',
+                            fontSize: 24, fontWeight: FontWeight.w900,
+                            color: ssGray800)),
+                    const SizedBox(height: 8),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        style: TextStyle(fontSize: 13.5, color: ssGray500,
+                            height: 1.6),
                         children: [
-                          const Text(
-                            'Ingat kata sandi? ',
-                            style: TextStyle(fontSize: 13, color: AppColors.gray500),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: const Text(
-                              '← Kembali Masuk',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.blue600,
-                              ),
-                            ),
-                          ),
+                          TextSpan(text: "Masukkan email terdaftar. Kami akan mengirim kode OTP yang berlaku "),
+                          TextSpan(text: "5 menit",
+                              style: TextStyle(fontWeight: FontWeight.w700,
+                                  color: ssGray800)),
+                          TextSpan(text: "."),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Email field
+                    Align(alignment: Alignment.centerLeft,
+                      child: const Text("Alamat Email",
+                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600,
+                              color: ssGray600))),
+                    const SizedBox(height: 5),
+                    TextField(
+                      controller: _email,
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(color: ssGray800, fontSize: 14),
+                      onSubmitted: (_) => _kirim(),
+                      decoration: ssInput(
+                        hint: "contoh@email.com",
+                        prefix: const Icon(Icons.mail_outline,
+                            color: ssGray400, size: 18),
+                      ),
+                    ),
+
+                    SSError(message: _error),
+                    const SizedBox(height: 22),
+
+                    SSButton(
+                        label: "Kirim Kode OTP",
+                        isLoading: _loading,
+                        onPressed: _kirim),
+                    const SizedBox(height: 20),
+
+                    GestureDetector(
+                      onTap: () => Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (_) => const LoginPage())),
+                      child: const Text("Ingat kata sandi? ← Kembali Masuk",
+                          style: TextStyle(color: ssBlue600, fontSize: 13,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ],
                 ),
               ),
             ),

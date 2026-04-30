@@ -1,415 +1,322 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Pages/app_them.dart';
-import 'package:flutter_application_1/Service/serviceapi.dart';
+import '../Service/serviceapi.dart';
+import './ss_them.dart';
 import 'login.dart';
 
 class ForgotResetPage extends StatefulWidget {
   final String email;
   final String otp;
   const ForgotResetPage({super.key, required this.email, required this.otp});
-
   @override
   State<ForgotResetPage> createState() => _ForgotResetPageState();
 }
 
-class _ForgotResetPageState extends State<ForgotResetPage>
-    with SingleTickerProviderStateMixin {
-  final _formKey   = GlobalKey<FormState>();
-  final _passCtrl  = TextEditingController();
-  final _konfCtrl  = TextEditingController();
+class _ForgotResetPageState extends State<ForgotResetPage> {
+  final _pass1 = TextEditingController();
+  final _pass2 = TextEditingController();
+  bool _loading = false;
+  bool _show1 = false;
+  bool _show2 = false;
+  String _error = "";
 
-  bool _loading  = false;
-  bool _showPass = false;
-  bool _showKonf = false;
-  String _error  = '';
-
-  late AnimationController _anim;
-  late Animation<double> _fadeAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _fadeAnim = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
-    _anim.forward();
-  }
+  bool get _match => _pass2.text.isNotEmpty && _pass1.text == _pass2.text;
+  bool get _noMatch => _pass2.text.isNotEmpty && _pass1.text != _pass2.text;
 
   @override
   void dispose() {
-    _anim.dispose();
-    _passCtrl.dispose();
-    _konfCtrl.dispose();
+    _pass1.dispose();
+    _pass2.dispose();
     super.dispose();
   }
 
-  int _strength(String pw) {
-    if (pw.isEmpty) return 0;
-    int s = 0;
-    if (pw.length >= 6)                          s++;
-    if (pw.length >= 10)                         s++;
-    if (pw.contains(RegExp(r'[A-Z]')))           s++;
-    if (pw.contains(RegExp(r'[0-9]')))           s++;
-    if (pw.contains(RegExp(r'[^A-Za-z0-9]')))   s++;
-    return s;
-  }
-
-  Color _strengthColor(int s) {
-    if (s <= 1) return AppColors.red500;
-    if (s <= 3) return AppColors.amber500;
-    return AppColors.green500;
-  }
-
-  String _strengthLabel(int s) {
-    if (s <= 1) return 'Lemah';
-    if (s <= 3) return 'Sedang';
-    return 'Kuat';
-  }
-
-  Future<void> _reset() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_passCtrl.text != _konfCtrl.text) {
-      setState(() => _error = 'Konfirmasi password tidak cocok.');
+  void _reset() async {
+    setState(() => _error = "");
+    if (_pass1.text.isEmpty || _pass2.text.isEmpty) {
+      setState(() => _error = "Semua field wajib diisi");
       return;
     }
-    setState(() { _loading = true; _error = ''; });
+    if (_pass1.text != _pass2.text) {
+      setState(() => _error = "Konfirmasi password tidak cocok");
+      return;
+    }
+    if (_pass1.text.length < 8) {
+      setState(() => _error = "Password minimal 8 karakter");
+      return;
+    }
 
-    final data = await ServiceApi.resetPassword(
-        widget.email, widget.otp, _passCtrl.text);
-
+    setState(() => _loading = true);
+    final res = await ServiceApi.resetPassword(
+        widget.email, widget.otp, _pass1.text);
     if (!mounted) return;
     setState(() => _loading = false);
 
-    if (data['status'] == 'success') {
-      _showSuccessDialog();
-    } else {
-      setState(() => _error = data['message'] ?? 'Gagal mereset password.');
-    }
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
+    if (res['status'] == 'success') {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          backgroundColor: ssWhite,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20)),
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppColors.green50,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_circle_outline_rounded,
-                  color: AppColors.green500,
-                  size: 40,
-                ),
+                width: 68,
+                height: 68,
+                decoration: const BoxDecoration(
+                    color: Color(0xffF0FDF4), shape: BoxShape.circle),
+                child: const Icon(Icons.check_circle_rounded,
+                    color: ssGreen, size: 40),
               ),
               const SizedBox(height: 16),
               const Text(
-                'Password Berhasil Diubah!',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.gray800,
-                ),
+                "Password Berhasil\nDiubah!",
                 textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: ssGray800),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Silakan masuk kembali dengan password baru kamu.',
-                style: TextStyle(fontSize: 13.5, color: AppColors.gray500, height: 1.5),
+                "Silakan login kembali dengan password baru kamu.",
                 textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 13, color: ssGray500, height: 1.5),
               ),
-              const SizedBox(height: 24),
-              AppButton(
-                text: 'Login Sekarang',
-                gradient: AppColors.btnGradientGreen,
-                shadowColor: Color(0x4016A34A),
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                    (route) => false,
-                  );
-                },
+              const SizedBox(height: 20),
+              SSButton(
+                label: "Login Sekarang",
+                isLoading: false,
+                onPressed: () => Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                  (r) => false,
+                ),
               ),
             ],
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      setState(
+          () => _error = res['message'] ?? "Gagal mengubah password");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final pw     = _passCtrl.text;
-    final konf   = _konfCtrl.text;
-    final s      = _strength(pw);
-    final match  = konf.isNotEmpty && pw == konf;
-    final noMatch = konf.isNotEmpty && pw != konf;
-
-    return GradientScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.gray700, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Password Baru',
-          style: TextStyle(
-              color: AppColors.gray800, fontWeight: FontWeight.w700, fontSize: 16),
-        ),
-        centerTitle: true,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnim,
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.blue600.withOpacity(0.12),
-                    blurRadius: 40,
-                    offset: const Offset(0, 16),
-                  ),
-                ],
-              ),
-              child: Form(
-                key: _formKey,
+    return Scaffold(
+      body: Container(
+        decoration: bgGradient,
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(maxWidth: 440),
+                padding:
+                    const EdgeInsets.fromLTRB(40, 44, 40, 36),
+                decoration: BoxDecoration(
+                  color: ssWhite,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Color(0x242563EB),
+                        blurRadius: 60,
+                        offset: Offset(0, 20)),
+                    BoxShadow(
+                        color: Color(0x0F000000),
+                        blurRadius: 16,
+                        offset: Offset(0, 4)),
+                  ],
+                ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Step indicator
-                    const StepIndicator(current: 3),
-                    const SizedBox(height: 24),
+                    const SSStepIndicator(current: 3),
+                    const SizedBox(height: 28),
 
                     // Icon
                     Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: AppColors.green50,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.shield_outlined,
-                        color: AppColors.green600,
-                        size: 28,
-                      ),
+                      width: 68,
+                      height: 68,
+                      decoration: const BoxDecoration(
+                          color: Color(0xffF0FDF4),
+                          shape: BoxShape.circle),
+                      child: const Icon(Icons.shield_outlined,
+                          color: ssGreen, size: 30),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     const Text(
-                      'Buat Password Baru',
+                      "Buat Password Baru",
                       style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.gray800,
-                      ),
+                          fontFamily: 'Nunito',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: ssGray800),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     const Text(
-                      'Buat password yang kuat dan mudah kamu ingat.',
+                      "Buat password baru yang kuat dan mudah kamu ingat.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 13.5, color: AppColors.gray500, height: 1.6),
+                          fontSize: 13.5,
+                          color: ssGray500,
+                          height: 1.6),
                     ),
                     const SizedBox(height: 28),
 
                     // Password baru
-                    Align(
+                    const Align(
                       alignment: Alignment.centerLeft,
-                      child: AppTextField(
-                        label: 'Password Baru',
-                        placeholder: 'Minimal 6 karakter',
-                        controller: _passCtrl,
-                        obscure: !_showPass,
-                        prefixIcon: const Icon(Icons.lock_outline_rounded,
-                            size: 18, color: AppColors.gray400),
-                        suffixIcon: IconButton(
+                      child: Text("Password Baru",
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: ssGray600)),
+                    ),
+                    const SizedBox(height: 5),
+                    TextField(
+                      controller: _pass1,
+                      obscureText: !_show1,
+                      style: const TextStyle(
+                          color: ssGray800, fontSize: 14),
+                      onChanged: (_) => setState(() {}),
+                      decoration: ssInput(
+                        hint: "Minimal 8 karakter",
+                        prefix: const Icon(Icons.lock_outline,
+                            color: ssGray400, size: 18),
+                        suffix: IconButton(
                           icon: Icon(
-                            _showPass
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            size: 18,
-                            color: AppColors.gray400,
-                          ),
+                              _show1
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: ssGray400,
+                              size: 20),
                           onPressed: () =>
-                              setState(() => _showPass = !_showPass),
+                              setState(() => _show1 = !_show1),
                         ),
-                        onChanged: (_) => setState(() => _error = ''),
-                        validator: (v) {
-                          if (v?.isEmpty ?? true) return 'Password wajib diisi';
-                          if (v!.length < 6) return 'Minimal 6 karakter';
-                          return null;
-                        },
                       ),
                     ),
-
-                    // Strength bar
-                    if (pw.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        children: List.generate(5, (i) {
-                          return Expanded(
-                            child: Container(
-                              height: 4,
-                              margin: EdgeInsets.only(right: i < 4 ? 4 : 0),
-                              decoration: BoxDecoration(
-                                color: i < s
-                                    ? _strengthColor(s)
-                                    : AppColors.gray200,
-                                borderRadius: BorderRadius.circular(99),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 5),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: _strengthColor(s).withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(99),
-                          ),
-                          child: Text(
-                            _strengthLabel(s),
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: _strengthColor(s),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 14),
 
                     // Konfirmasi password
-                    Align(
+                    const Align(
                       alignment: Alignment.centerLeft,
-                      child: AppTextField(
-                        label: 'Konfirmasi Password',
-                        placeholder: 'Ulangi password baru',
-                        controller: _konfCtrl,
-                        obscure: !_showKonf,
-                        prefixIcon: Icon(
-                          Icons.shield_outlined,
-                          size: 18,
-                          color: match
-                              ? AppColors.green500
-                              : noMatch
-                                  ? AppColors.red500
-                                  : AppColors.gray400,
-                        ),
+                      child: Text("Konfirmasi Password",
+                          style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: ssGray600)),
+                    ),
+                    const SizedBox(height: 5),
+                    TextField(
+                      controller: _pass2,
+                      obscureText: !_show2,
+                      style: const TextStyle(
+                          color: ssGray800, fontSize: 14),
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        hintText: "Ulangi password baru",
+                        hintStyle: const TextStyle(
+                            color: ssGray300, fontSize: 14),
+                        filled: true,
+                        fillColor: _match
+                            ? const Color(0xffF0FDF4)
+                            : _noMatch
+                                ? const Color(0xffFEF2F2)
+                                : ssGray50,
+                        prefixIcon: const Icon(
+                            Icons.shield_outlined,
+                            color: ssGray400,
+                            size: 18),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _showKonf
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            size: 18,
-                            color: AppColors.gray400,
-                          ),
+                              _show2
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: ssGray400,
+                              size: 20),
                           onPressed: () =>
-                              setState(() => _showKonf = !_showKonf),
+                              setState(() => _show2 = !_show2),
                         ),
-                        onChanged: (_) => setState(() => _error = ''),
-                        validator: (v) =>
-                            (v?.isEmpty ?? true)
-                                ? 'Konfirmasi wajib diisi'
-                                : null,
-                      ),
-                    ),
-                    if (match)
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 5),
-                          child: Text(
-                            '✓ Password cocok',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.green500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (noMatch)
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 5),
-                          child: Text(
-                            '✗ Password tidak cocok',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.red500,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    // Error
-                    if (_error.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.red50,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 13),
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.red500.withOpacity(0.3)),
-                        ),
-                        child: Text(
-                          _error,
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            color: AppColors.red500,
-                            fontWeight: FontWeight.w600,
+                          borderSide: BorderSide(
+                            color: _match
+                                ? ssGreen
+                                : _noMatch
+                                    ? ssRed
+                                    : ssGray200,
+                            width: 1.8,
                           ),
-                          textAlign: TextAlign.center,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: _match ? ssGreen : ssBlue500,
+                            width: 1.8,
+                          ),
                         ),
                       ),
-                    ],
-
-                    const SizedBox(height: 22),
-                    AppButton(
-                      text: 'Simpan Password Baru',
-                      loading: _loading,
-                      gradient: AppColors.btnGradientGreen,
-                      shadowColor: const Color(0x4016A34A),
-                      onPressed: (_loading || !match) ? null : _reset,
                     ),
-                    const SizedBox(height: 20),
+
+                    if (_match)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("✓ Password cocok",
+                              style: TextStyle(
+                                  color: ssGreen,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    if (_noMatch)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("✗ Password tidak cocok",
+                              style: TextStyle(
+                                  color: ssRed,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+
+                    SSError(message: _error),
+                    const SizedBox(height: 22),
+
+                    // Tombol hijau
+                    SSButton(
+                      label: "Simpan Password Baru",
+                      isLoading: _loading,
+                      onPressed: _match ? _reset : null,
+                      colors: const [ssGreen, ssGreenD],
+                    ),
+                    const SizedBox(height: 16),
 
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LoginPage()),
+                          (r) => false),
                       child: const Text(
-                        '← Kembali',
+                        "← Kembali ke Login",
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.blue600,
-                        ),
+                            color: ssBlue600,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
